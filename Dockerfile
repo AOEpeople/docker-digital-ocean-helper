@@ -1,13 +1,13 @@
 FROM alpine:3.10
 
-ENV HELM_VERSION 2.14.3
-ENV KUBECTL_VERSION 1.16.0
-ENV DOCTL_VERSION 1.31.2
+ENV HELM_VERSION 2.15.2
+ENV KUBECTL_VERSION 1.16.2
+ENV DOCTL_VERSION 1.33.1
 
 WORKDIR /
 
-# Enable SSL
-RUN apk --update add ca-certificates wget python curl tar
+# Enable SSL, helm plugins require git, helm-diff requires bash, curl
+RUN apk --update add ca-certificates wget python curl tar openssh git bash
 
 # Install kubectl
 ADD https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
@@ -23,10 +23,6 @@ RUN curl -o /tmp/$FILENAME ${HELM_URL} \
   && tar -zxvf /tmp/${FILENAME} -C /tmp \
   && mv /tmp/linux-amd64/helm /bin/helm \
   && rm -rf /tmp
-
-# Helm plugins require git
-# helm-diff requires bash, curl
-RUN apk --update add git bash
 
 # Install envsubst [better than using 'sed' for yaml substitutions]
 ENV BUILD_DEPS="gettext"  \
@@ -44,11 +40,6 @@ RUN helm init --client-only
 RUN mkdir /tmp
 RUN helm plugin install https://github.com/viglesiasce/helm-gcs.git
 RUN helm plugin install https://github.com/databus23/helm-diff
-
-
-
-RUN apk update && apk upgrade && \
-    apk add bash git openssh
 
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 
