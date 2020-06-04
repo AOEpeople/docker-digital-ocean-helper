@@ -1,8 +1,8 @@
 FROM alpine:3.10
 
-ENV HELM_VERSION 2.16.1
-ENV KUBECTL_VERSION 1.16.6
-ENV DOCTL_VERSION 1.38.0
+ENV HELM_VERSION 3.2.1
+ENV KUBECTL_VERSION 1.18.3
+ENV DOCTL_VERSION 1.45.0
 
 WORKDIR /
 
@@ -15,8 +15,7 @@ RUN chmod +x /usr/local/bin/kubectl
 
 # Install Helm
 ENV FILENAME helm-v${HELM_VERSION}-linux-amd64.tar.gz
-ENV HELM_URL https://storage.googleapis.com/kubernetes-helm/${FILENAME}
-
+ENV HELM_URL https://get.helm.sh/${FILENAME}
 RUN echo $HELM_URL
 
 RUN curl -o /tmp/$FILENAME ${HELM_URL} \
@@ -34,8 +33,6 @@ RUN set -x && \
     cp /usr/bin/envsubst /usr/local/bin/envsubst && \
     apk del build_deps
 
-# Install Helm plugins
-RUN helm init --client-only
 # Plugin is downloaded to /tmp, which must exist
 RUN mkdir /tmp
 RUN helm plugin install https://github.com/viglesiasce/helm-gcs.git
